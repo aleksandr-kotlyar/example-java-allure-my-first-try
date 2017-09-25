@@ -13,10 +13,13 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 
+import static com.codeborne.selenide.Configuration.reportsFolder;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static org.junit.Assert.fail;
 
@@ -26,10 +29,12 @@ public class AbstractWebTest {
     public TestWatcher watchman = new TestWatcher() {
         @Override
         protected void failed(Throwable e, Description description) {
-//            String screenName = description.getClassName() + "_" + description.getMethodName() + "_" + System.currentTimeMillis();
-//            Screenshots.takeScreenShot(description.getClassName() + "_" + description.getMethodName() + "_" + System.currentTimeMillis());
+            //TODO screenName doesn't use in Allure. why? */
+            String screenName = description.getClassName() + "_" + description.getMethodName() + "_" + System.currentTimeMillis();
             try {
-                saveScreenshot();
+                getHtmlSource(screenName);
+                if (Screenshots.takeScreenShotAsFile() != null)
+                    saveScreenshot();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -40,13 +45,32 @@ public class AbstractWebTest {
         }
     };
 
-    @Attachment()
-    public byte[] saveScreenshot() throws IOException {
-        File file = Screenshots.getLastScreenshot();
-        if (file == null)
-            return new byte[0]; //to catch NPE
-        return Files.toByteArray(file);
+    //TODO getHtmlSource returns .xhtml when using Chrome. why?
+    //TODO could selenide takePageSourceToFile be more easier than that copy/paste from ScreenShotLaboratory?
+    @Attachment(value = "customName", type = "string/html")
+    private byte[] getHtmlSource(String screenName) throws IOException {
+        File pageSource = new File(reportsFolder, screenName + ".html");
+        String content = getWebDriver().getPageSource();
+        try (ByteArrayInputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
+            try (FileOutputStream out = new FileOutputStream(pageSource)) {
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (IOException e) {
+                fail("Failed to write file " + pageSource.getAbsolutePath() + e);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Files.toByteArray(pageSource);
+    }
 
+    @Attachment(type = "image/png")
+    private byte[] saveScreenshot() throws IOException {
+        File file = Screenshots.takeScreenShotAsFile();
+        return Files.toByteArray(file);
     }
 
     private static final String CHROME = "chrome";
@@ -85,9 +109,9 @@ public class AbstractWebTest {
     @After
     public void tearDown() throws Exception {
         driverName = "";
-        saveScreenshot();
-        if (getWebDriver() != null)
-            getWebDriver().quit();
+        //TODO testwatcher fails after tearDown, why? How can i close webdriver than?
+//        if (getWebDriver() != null)
+//            getWebDriver().quit();
     }
 
     protected void switchOnJavaScript() {
