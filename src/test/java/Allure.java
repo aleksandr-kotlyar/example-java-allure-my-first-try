@@ -22,7 +22,7 @@ public class Allure {
         return Files.toByteArray(file);
     }
 
-    protected void takeScreenShots(Description description) {
+    protected void takeScreenShots() {
         try {
             getHtmlSource();
             if (!isHtmlUnit())

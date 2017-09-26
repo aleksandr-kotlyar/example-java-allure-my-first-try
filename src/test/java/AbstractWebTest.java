@@ -4,10 +4,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.lang.annotation.Annotation;
 
@@ -22,13 +20,13 @@ public class AbstractWebTest {
 
         @Override
         protected void failed(Throwable e, Description description) {
-            allure.takeScreenShots(description);
+            allure.takeScreenShots();
         }
 
-        @Override
-        protected void finished(Description description) {
-            closeWebdriver();
-        }
+//        @Override
+//        protected void finished(Description description) {
+//            //   closeWebdriver();
+//        }
     };
 
     private void closeWebdriver() {
@@ -43,7 +41,6 @@ public class AbstractWebTest {
 
     @Before
     public void setUp() throws Exception {
-        WebDriver driver = null;
         String driverName = "";
 
         if (this.getClass().isAnnotationPresent(NonDefaultDriver.class)) {
@@ -53,19 +50,15 @@ public class AbstractWebTest {
         }
         String webDriver = driverName.isEmpty() ? HTML_UNIT_DRIVER : driverName;
         if (CHROME.equalsIgnoreCase(webDriver)) {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--headless");
-            chromeOptions.addArguments("--disable-gpu");
-            chromeOptions.addArguments("--window-size=1280,1000");
-            driver = new ChromeDriver(chromeOptions);
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            WebDriverRunner.setWebDriver(new CustomChromeDriver().createDriver(capabilities));
             System.out.println("-----------------USING CHROME DRIVER-----------------");
         } else if (HTML_UNIT_DRIVER.equalsIgnoreCase(webDriver)) {
-            driver = new ModifiedHtmlUnitDriver();
+            WebDriverRunner.setWebDriver(new ModifiedHtmlUnitDriver());
             System.out.println("-----------------USING HTMLUNITDRIVER DRIVER-----------------");
         } else {
             fail("Set property 'driverName' to 'chrome' or 'htmlUnitDriver'");
         }
-        WebDriverRunner.setWebDriver(driver);
         Configuration.baseUrl = "https://www.google.ru";
         Configuration.timeout = 4000;
         Configuration.screenshots = true;
