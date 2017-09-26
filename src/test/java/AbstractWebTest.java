@@ -1,9 +1,5 @@
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Screenshots;
 import com.codeborne.selenide.WebDriverRunner;
-import com.google.common.io.Files;
-import io.qameta.allure.Attachment;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -13,13 +9,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 
-import static com.codeborne.selenide.Configuration.reportsFolder;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static org.junit.Assert.fail;
 
@@ -27,59 +18,33 @@ public class AbstractWebTest {
 
     @Rule
     public TestWatcher watchman = new TestWatcher() {
+        Allure allure = new Allure();
+
         @Override
         protected void failed(Throwable e, Description description) {
-            //TODO screenName doesn't use in Allure. why? */
-            String screenName = description.getClassName() + "_" + description.getMethodName() + "_" + System.currentTimeMillis();
-            try {
-                getHtmlSource(screenName);
-                if (Screenshots.takeScreenShotAsFile() != null)
-                    saveScreenshot();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            allure.takeScreenShots(description);
         }
 
         @Override
-        protected void succeeded(Description description) {
+        protected void finished(Description description) {
+            closeWebdriver();
         }
     };
 
-    //TODO getHtmlSource returns .xhtml when using Chrome. why?
-    //TODO could selenide takePageSourceToFile be more easier than that copy/paste from ScreenShotLaboratory?
-    @Attachment(value = "customName", type = "string/html")
-    private byte[] getHtmlSource(String screenName) throws IOException {
-        File pageSource = new File(reportsFolder, screenName + ".html");
-        String content = getWebDriver().getPageSource();
-        try (ByteArrayInputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
-            try (FileOutputStream out = new FileOutputStream(pageSource)) {
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
-                }
-            } catch (IOException e) {
-                fail("Failed to write file " + pageSource.getAbsolutePath() + e);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Files.toByteArray(pageSource);
+    private void closeWebdriver() {
+        if (getWebDriver() != null)
+            getWebDriver().quit();
     }
 
-    @Attachment(type = "image/png")
-    private byte[] saveScreenshot() throws IOException {
-        File file = Screenshots.takeScreenShotAsFile();
-        return Files.toByteArray(file);
-    }
 
     private static final String CHROME = "chrome";
     private static final String HTML_UNIT_DRIVER = "htmlUnitDriver";
-    private String driverName = "";
+
 
     @Before
     public void setUp() throws Exception {
         WebDriver driver = null;
+        String driverName = "";
 
         if (this.getClass().isAnnotationPresent(NonDefaultDriver.class)) {
             Annotation annotation = this.getClass().getAnnotation(NonDefaultDriver.class);
@@ -106,23 +71,19 @@ public class AbstractWebTest {
         Configuration.screenshots = true;
     }
 
-    @After
-    public void tearDown() throws Exception {
-        driverName = "";
-        //TODO testwatcher fails after tearDown, why? How can i close webdriver than?
-//        if (getWebDriver() != null)
-//            getWebDriver().quit();
-    }
-
     protected void switchOnJavaScript() {
-        if (getWebDriver() instanceof HtmlUnitDriver) {
+        if (isHtmlUnit()) {
             ((HtmlUnitDriver) getWebDriver()).setJavascriptEnabled(true);
         }
     }
 
     protected void switchOffJavaScript() {
-        if (getWebDriver() instanceof HtmlUnitDriver) {
+        if (isHtmlUnit()) {
             ((HtmlUnitDriver) getWebDriver()).setJavascriptEnabled(false);
         }
+    }
+
+    private boolean isHtmlUnit() {
+        return getWebDriver() instanceof HtmlUnitDriver;
     }
 }
