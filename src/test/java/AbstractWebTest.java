@@ -23,10 +23,10 @@ public class AbstractWebTest {
             allure.takeScreenShots();
         }
 
-//        @Override
-//        protected void finished(Description description) {
-//            //   closeWebdriver();
-//        }
+        @Override
+        protected void finished(Description description) {
+            closeWebdriver();
+        }
     };
 
     private void closeWebdriver() {
@@ -50,8 +50,7 @@ public class AbstractWebTest {
         }
         String webDriver = driverName.isEmpty() ? HTML_UNIT_DRIVER : driverName;
         if (CHROME.equalsIgnoreCase(webDriver)) {
-            DesiredCapabilities capabilities = new DesiredCapabilities();
-            WebDriverRunner.setWebDriver(new CustomChromeDriver().createDriver(capabilities));
+            WebDriverRunner.setWebDriver(new CustomChromeDriver().createDriver(new DesiredCapabilities()));
             System.out.println("-----------------USING CHROME DRIVER-----------------");
         } else if (HTML_UNIT_DRIVER.equalsIgnoreCase(webDriver)) {
             WebDriverRunner.setWebDriver(new ModifiedHtmlUnitDriver());
