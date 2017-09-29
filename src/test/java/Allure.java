@@ -10,22 +10,22 @@ import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 
 public class Allure {
 
-    @Attachment(value = "html page source", type = "text/html")
-    protected byte[] getHtmlSource() throws IOException {
+    @Attachment(value = "{name}", type = "text/html")
+    protected byte[] getHtmlSource(String name) throws IOException {
         return getWebDriver().getPageSource().getBytes("UTF-8");
     }
 
-    @Attachment(value = "image screenshot", type = "image/png")
-    protected byte[] saveScreenshot() throws IOException {
+    @Attachment(value = "{name}", type = "image/png")
+    protected byte[] saveScreenshot(String name) throws IOException {
         File file = Screenshots.takeScreenShotAsFile();
         return Files.toByteArray(file);
     }
 
     protected void takeScreenShots() {
         try {
-            getHtmlSource();
+            getHtmlSource("html page source");
             if (!isHtmlUnit())
-                saveScreenshot();
+                saveScreenshot("image screenshot");
         } catch (IOException e1) {
             e1.printStackTrace();
         }
