@@ -5,6 +5,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 
@@ -12,7 +13,7 @@ public class Allure {
 
     @Attachment(value = "{name}", type = "text/html")
     protected byte[] getHtmlSource(String name) throws IOException {
-        return getWebDriver().getPageSource().getBytes("UTF-8");
+        return getWebDriver().getPageSource().getBytes(StandardCharsets.UTF_8);
     }
 
     @Attachment(value = "{name}", type = "image/png")
