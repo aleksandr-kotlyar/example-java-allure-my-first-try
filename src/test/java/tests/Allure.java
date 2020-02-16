@@ -1,3 +1,5 @@
+package tests;
+
 import com.codeborne.selenide.Screenshots;
 import com.google.common.io.Files;
 import io.qameta.allure.Attachment;
@@ -22,6 +24,10 @@ public class Allure {
         return Files.toByteArray(file);
     }
 
+    /**
+     * @method gets html page sources for all browsers.
+     * If browser is not HtmlUnit - then PNG screenshot will be taken too.
+     */
     protected void takeScreenShots() {
         try {
             getHtmlSource("html page source");
@@ -32,6 +38,10 @@ public class Allure {
         }
     }
 
+    /**
+     * @method isHtmlUnit() checks if browser is instance of HtmlUnitDriver.
+     * Return True if is HtmlUnitDriver, False if not.
+     */
     private boolean isHtmlUnit() {
         return getWebDriver() instanceof HtmlUnitDriver;
     }
