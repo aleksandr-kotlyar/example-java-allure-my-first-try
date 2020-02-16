@@ -40,7 +40,7 @@ public class AbstractWebTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         String driverName = "";
 
         if (this.getClass().isAnnotationPresent(NonDefaultDriver.class)) {
