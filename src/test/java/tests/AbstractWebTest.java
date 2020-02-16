@@ -1,3 +1,5 @@
+package tests;
+
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.WebDriverRunner;
 import org.junit.Before;
@@ -14,10 +16,16 @@ import static org.junit.Assert.fail;
 
 public class AbstractWebTest {
 
+    private static final String CHROME = "chrome";
+    private static final String HTML_UNIT_DRIVER = "htmlUnitDriver";
+
     @Rule
     public TestWatcher watchman = new TestWatcher() {
         Allure allure = new Allure();
 
+        /**
+         * @method failed() takes Screenshot to Allure on test fail.
+         */
         @Override
         protected void failed(Throwable e, Description description) {
             allure.takeScreenShots();
@@ -33,11 +41,6 @@ public class AbstractWebTest {
         if (getWebDriver() != null)
             getWebDriver().quit();
     }
-
-
-    private static final String CHROME = "chrome";
-    private static final String HTML_UNIT_DRIVER = "htmlUnitDriver";
-
 
     @Before
     public void setUp() {

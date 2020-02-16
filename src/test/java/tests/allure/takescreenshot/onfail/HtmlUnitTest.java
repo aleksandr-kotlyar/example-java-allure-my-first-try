@@ -1,12 +1,15 @@
+package tests.allure.takescreenshot.onfail;
+
 import com.codeborne.selenide.Condition;
 import org.junit.Test;
+import tests.AbstractWebTest;
 
 import static com.codeborne.selenide.Configuration.baseUrl;
 import static com.codeborne.selenide.Selectors.by;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
-public class SimpleHtmlUnitTest extends AbstractWebTest {
+public class HtmlUnitTest extends AbstractWebTest {
     /**
      * negative
      */
