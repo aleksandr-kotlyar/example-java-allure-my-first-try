@@ -2,6 +2,8 @@ import com.codeborne.selenide.Condition;
 import org.junit.Test;
 
 import static com.codeborne.selenide.Configuration.baseUrl;
+import static com.codeborne.selenide.Selectors.by;
+import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
 public class SimpleHtmlUnitTest extends AbstractWebTest {
@@ -12,14 +14,14 @@ public class SimpleHtmlUnitTest extends AbstractWebTest {
     public void testGoogleLogoNegativeWithJsOff() {
         switchOffJavaScript();
         open(baseUrl);
-        new GooglePage().getGoogleLogo().shouldNotBe(Condition.visible);
+        $(by("id", "hplogo")).shouldNotBe(Condition.visible);
     }
 
     @Test
     public void testGoogleLogoNegativeWithJsOn() {
         switchOnJavaScript();
         open(baseUrl);
-        new GooglePage().getGoogleLogo().shouldNotBe(Condition.visible);
+        $(by("id", "hplogo")).shouldNotBe(Condition.visible);
     }
 
     /**
@@ -29,13 +31,13 @@ public class SimpleHtmlUnitTest extends AbstractWebTest {
     public void testGoogleLogoPositiveWithJsOn() {
         switchOnJavaScript();
         open(baseUrl);
-        new GooglePage().getGoogleLogo().shouldBe(Condition.visible);
+        $(by("id", "hplogo")).shouldBe(Condition.visible);
     }
 
     @Test
     public void testGoogleLogoPositiveWithJsOff() {
         switchOffJavaScript();
         open(baseUrl);
-        new GooglePage().getGoogleLogo().shouldBe(Condition.visible);
+        $(by("id", "hplogo")).shouldBe(Condition.visible);
     }
 }
